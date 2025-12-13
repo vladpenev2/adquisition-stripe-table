@@ -35,18 +35,23 @@
     </stripe-pricing-table>
 
     <script>
+      // ---------- URL params ----------
       const params = new URLSearchParams(window.location.search);
-      const email = params.get("email");               // new users
-      const sessionToken = params.get("session_token"); // upgrades
+
+      const email = params.get("email")
+        ? decodeURIComponent(params.get("email"))
+        : null;
+
+      const sessionToken = params.get("session_token");
 
       const pricingTable = document.getElementById("pricingTable");
 
-      // 1️⃣ Prefill customer email (safe, client-side)
-      if (email) {
-        pricingTable.setAttribute("customer-email", email);
+      // ---------- Helpers ----------
+      function whenStripeReady(cb) {
+        customElements.whenDefined("stripe-pricing-table").then(cb);
       }
 
-      // 2️⃣ Attach existing Stripe customer (upgrade / downgrade)
+      // ---------- Upgrade flow (existing customer) ----------
       async function attachCustomerSession(token) {
         try {
           const res = await fetch(
@@ -62,18 +67,27 @@
 
           const data = await res.json();
           if (data?.client_secret) {
-            pricingTable.setAttribute(
-              "customer-session-client-secret",
-              data.client_secret
-            );
+            whenStripeReady(() => {
+              pricingTable.setAttribute(
+                "customer-session-client-secret",
+                data.client_secret
+              );
+            });
           }
-        } catch (err) {
-          // fail silently — pricing table still works for new users
+        } catch (_) {
+          // silent fail — pricing table still usable
         }
       }
 
+      // ---------- Entry logic ----------
       if (sessionToken) {
+        // Existing customer → upgrade / downgrade
         attachCustomerSession(sessionToken);
+      } else if (email) {
+        // New customer → prefill email
+        whenStripeReady(() => {
+          pricingTable.setAttribute("customer-email", email);
+        });
       }
     </script>
   </body>
