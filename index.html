@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Pricing</title>
+
+    <script async src="https://js.stripe.com/v3/pricing-table.js"></script>
+
+    <style>
+      html, body {
+        margin: 0;
+        padding: 0;
+        background: transparent;
+      }
+
+      /* Helps avoid ugly spacing in embedded views */
+      body {
+        display: flex;
+        justify-content: center;
+      }
+
+      stripe-pricing-table {
+        width: 100%;
+        max-width: 980px; /* tweak if you want */
+      }
+    </style>
+  </head>
+  <body>
+    <stripe-pricing-table
+      pricing-table-id="prctbl_1Sd6F4L7tv8OyZVQ34gW4RZ0"
+      publishable-key="pk_live_51OFNEWL7tv8OyZVQ9YKUBbjbFUnVSeGTAdhp4XfAsShwHDxzmXvWKbBtQq3yrj16L9AuVIDWrVLSyZwq65fwhRGp00xr3C9LyP">
+    </stripe-pricing-table>
+  </body>
+</html>
