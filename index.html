@@ -51,6 +51,14 @@
         customElements.whenDefined("stripe-pricing-table").then(cb);
       }
 
+      function isValidSessionToken(token) {
+        return (
+          typeof token === "string" &&
+          token.startsWith("st_") &&
+          token.length > 10
+        );
+      }
+
       // ---------- Upgrade flow (existing customer) ----------
       async function attachCustomerSession(token) {
         try {
@@ -75,19 +83,28 @@
             });
           }
         } catch (_) {
-          // fail silently — pricing table still works for new users
+          // fail silently — fallback to new customer flow
         }
       }
 
       // ---------- Entry logic ----------
-      if (sessionToken) {
-        // Existing customer → upgrade / downgrade
+      if (isValidSessionToken(sessionToken)) {
+        // Existing paying customer → upgrade / downgrade
         attachCustomerSession(sessionToken);
       } else if (email) {
-        // New customer → prefill email
+        // Free trial / new customer → prefill email
         whenStripeReady(() => {
           pricingTable.setAttribute("customer-email", email);
         });
+      }
+
+      // ---------- Optional: clean URL ----------
+      if (!isValidSessionToken(sessionToken) && params.has("session_token")) {
+        params.delete("session_token");
+        const cleanUrl =
+          window.location.pathname +
+          (params.toString() ? `?${params.toString()}` : "");
+        window.history.replaceState({}, "", cleanUrl);
       }
     </script>
   </body>
