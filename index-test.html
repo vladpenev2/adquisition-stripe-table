@@ -1,111 +1,53 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Pricing (Test)</title>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pricing (Test)</title>
 
-    <!-- Stripe Pricing Table (TEST MODE) -->
-    <script async src="https://js.stripe.com/v3/pricing-table.js"></script>
+  <script async src="https://js.stripe.com/v3/pricing-table.js"></script>
 
-    <style>
-      html, body {
-        margin: 0;
-        padding: 0;
-        background: transparent;
-      }
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: transparent;
+    }
+    body {
+      display: flex;
+      justify-content: center;
+    }
+    stripe-pricing-table {
+      width: 100%;
+      max-width: 980px;
+    }
+  </style>
+</head>
 
-      body {
-        display: flex;
-        justify-content: center;
-      }
+<body>
+  <stripe-pricing-table
+    id="pricingTable"
+    pricing-table-id="prctbl_1SeIYhLgbdPrETpmx0WrcWgR"
+    publishable-key="pk_test_51SdqOFLgbdPrETpm8yVbtrogeXBxEjIDXgPNQcQvree8xgmqyPTygcTO3W0xrW9cLXRb8oCNCdsYm1kxvOnJfXqd00iUkimTDu">
+  </stripe-pricing-table>
 
-      stripe-pricing-table {
-        width: 100%;
-        max-width: 980px;
-      }
-    </style>
-  </head>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const email = params.get("email");
+    const clientSecret = params.get("customer_session");
 
-  <body>
-    <stripe-pricing-table
-      id="pricingTable"
-      pricing-table-id="prctbl_1SeIYhLgbdPrETpmx0WrcWgR"
-      publishable-key="pk_test_51SdqOFLgbdPrETpm8yVbtrogeXBxEjIDXgPNQcQvree8xgmqyPTygcTO3W0xrW9cLXRb8oCNCdsYm1kxvOnJfXqd00iUkimTDu">
-    </stripe-pricing-table>
+    const table = document.getElementById("pricingTable");
 
-    <script>
-      // ---------- URL params ----------
-      const params = new URLSearchParams(window.location.search);
-
-      const email = params.get("email")
-        ? decodeURIComponent(params.get("email"))
-        : null;
-
-      const sessionToken = params.get("session_token");
-
-      const pricingTable = document.getElementById("pricingTable");
-
-      // ---------- Helpers ----------
-      function whenStripeReady(cb) {
-        customElements.whenDefined("stripe-pricing-table").then(cb);
-      }
-
-      function isValidSessionToken(token) {
-        return (
-          typeof token === "string" &&
-          token.startsWith("st_") &&
-          token.length > 10
+    customElements.whenDefined("stripe-pricing-table").then(() => {
+      if (clientSecret) {
+        table.setAttribute(
+          "customer-session-client-secret",
+          clientSecret
         );
-      }
-
-      // ---------- Upgrade flow (existing customer - TEST) ----------
-      async function attachCustomerSession(token) {
-        try {
-          const res = await fetch(
-            "https://webhook-processor-production-3927.up.railway.app/webhook/stripe-customer-session",
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ session_token: token })
-            }
-          );
-
-          if (!res.ok) return;
-
-          const data = await res.json();
-          if (data?.client_secret) {
-            whenStripeReady(() => {
-              pricingTable.setAttribute(
-                "customer-session-client-secret",
-                data.client_secret
-              );
-            });
-          }
-        } catch (_) {
-          // silent fallback to new customer flow
-        }
-      }
-
-      // ---------- Entry logic ----------
-      if (isValidSessionToken(sessionToken)) {
-        // Existing test customer → upgrade / downgrade
-        attachCustomerSession(sessionToken);
       } else if (email) {
-        // New test customer → prefill email
-        whenStripeReady(() => {
-          pricingTable.setAttribute("customer-email", email);
-        });
+        table.setAttribute("customer-email", decodeURIComponent(email));
       }
-
-      // ---------- Clean empty token from URL ----------
-      if (!isValidSessionToken(sessionToken) && params.has("session_token")) {
-        params.delete("session_token");
-        const cleanUrl =
-          window.location.pathname +
-          (params.toString() ? `?${params.toString()}` : "");
-        window.history.replaceState({}, "", cleanUrl);
-      }
-    </script>
-  </body>
+    });
+  </script>
+</body>
 </html>
