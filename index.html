@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Pricing</title>
+  <title>Upgrade Plan</title>
 
   <script async src="https://js.stripe.com/v3/pricing-table.js"></script>
 
@@ -33,21 +33,34 @@
 
   <script>
     const params = new URLSearchParams(window.location.search);
+
     const email = params.get("email");
-    const clientSecret = params.get("customer_session");
+    const customerSession = params.get("customer_session");
+    const workspaceId = params.get("workspace_id");
 
     const table = document.getElementById("pricingTable");
 
     customElements.whenDefined("stripe-pricing-table").then(() => {
-      if (clientSecret) {
-        // Existing customer (upgrade/downgrade)
+      if (customerSession) {
+        // Existing customer (upgrade / downgrade)
         table.setAttribute(
           "customer-session-client-secret",
-          clientSecret
+          customerSession
         );
       } else if (email) {
-        // Free trial / new user
-        table.setAttribute("customer-email", decodeURIComponent(email));
+        // New customer / free trial
+        table.setAttribute(
+          "customer-email",
+          decodeURIComponent(email)
+        );
+      }
+
+      if (workspaceId) {
+        // Internal mapping ONLY (hidden from user)
+        table.setAttribute(
+          "client-reference-id",
+          workspaceId
+        );
       }
     });
   </script>
