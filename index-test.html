@@ -1,53 +1,60 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Pricing (Test)</title>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Pricing (Test)</title>
 
-  <script async src="https://js.stripe.com/v3/pricing-table.js"></script>
+    <script async src="https://js.stripe.com/v3/pricing-table.js"></script>
 
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      background: transparent;
-    }
-    body {
-      display: flex;
-      justify-content: center;
-    }
-    stripe-pricing-table {
-      width: 100%;
-      max-width: 980px;
-    }
-  </style>
-</head>
-
-<body>
-  <stripe-pricing-table
-    id="pricingTable"
-    pricing-table-id="prctbl_1SeIYhLgbdPrETpmx0WrcWgR"
-    publishable-key="pk_test_51SdqOFLgbdPrETpm8yVbtrogeXBxEjIDXgPNQcQvree8xgmqyPTygcTO3W0xrW9cLXRb8oCNCdsYm1kxvOnJfXqd00iUkimTDu">
-  </stripe-pricing-table>
-
-  <script>
-    const params = new URLSearchParams(window.location.search);
-    const email = params.get("email");
-    const clientSecret = params.get("customer_session");
-
-    const table = document.getElementById("pricingTable");
-
-    customElements.whenDefined("stripe-pricing-table").then(() => {
-      if (clientSecret) {
-        table.setAttribute(
-          "customer-session-client-secret",
-          clientSecret
-        );
-      } else if (email) {
-        table.setAttribute("customer-email", decodeURIComponent(email));
+    <style>
+      html, body {
+        margin: 0;
+        padding: 0;
+        background: transparent;
       }
-    });
-  </script>
-</body>
+
+      body {
+        display: flex;
+        justify-content: center;
+      }
+
+      stripe-pricing-table {
+        width: 100%;
+        max-width: 980px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <stripe-pricing-table
+      id="pricingTable"
+      pricing-table-id="prctbl_1SeIYhLgbdPrETpmx0WrcWgR"
+      publishable-key="pk_test_51SdqOFLgbdPrETpm8yVbtrogeXBxEjIDXgPNQcQvree8xgmqyPTygcTO3W0xrW9cLXRb8oCNCdsYm1kxvOnJfXqd00iUkimTDu">
+    </stripe-pricing-table>
+
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      const email = params.get("email");
+      const customerSession = params.get("customer_session");
+
+      const table = document.getElementById("pricingTable");
+
+      customElements.whenDefined("stripe-pricing-table").then(() => {
+        if (customerSession) {
+          // Existing TEST customer (upgrade/downgrade)
+          table.setAttribute(
+            "customer-session-client-secret",
+            customerSession
+          );
+        } else if (email) {
+          // New TEST customer / free trial
+          table.setAttribute(
+            "customer-email",
+            decodeURIComponent(email)
+          );
+        }
+      });
+    </script>
+  </body>
 </html>
